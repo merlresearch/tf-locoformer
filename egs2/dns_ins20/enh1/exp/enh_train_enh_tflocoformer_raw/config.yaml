@@ -1,0 +1,216 @@
+# Copyright (C) 2024 Mitsubishi Electric Research Laboratories (MERL)
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+config: conf/tuning/train_enh_tflocoformer.yaml
+print_config: false
+log_level: INFO
+drop_last_iter: false
+dry_run: false
+iterator_type: chunk
+valid_iterator_type: null
+output_dir: exp/enh_train_enh_tflocoformer_raw
+ngpu: 1
+seed: 0
+num_workers: 4
+num_att_plot: 3
+dist_backend: nccl
+dist_init_method: env://
+dist_world_size: 4
+dist_rank: 0
+local_rank: 0
+dist_master_addr: localhost
+dist_master_port: 56555
+dist_launcher: null
+multiprocessing_distributed: true
+unused_parameters: false
+sharded_ddp: false
+cudnn_enabled: true
+cudnn_benchmark: false
+cudnn_deterministic: true
+collect_stats: false
+write_collected_feats: false
+max_epoch: 150
+patience: 10
+val_scheduler_criterion:
+- valid
+- loss
+early_stopping_criterion:
+- valid
+- loss
+- min
+best_model_criterion:
+-   - valid
+    - si_snr
+    - max
+-   - valid
+    - loss
+    - min
+keep_nbest_models: 5
+nbest_averaging_interval: 0
+grad_clip: 5.0
+grad_clip_type: 2.0
+grad_noise: false
+accum_grad: 1
+no_forward_run: false
+resume: true
+train_dtype: float32
+use_amp: false
+log_interval: null
+use_matplotlib: true
+use_tensorboard: true
+create_graph_in_tensorboard: false
+use_wandb: false
+wandb_project: null
+wandb_id: null
+wandb_entity: null
+wandb_name: null
+wandb_model_log_interval: -1
+detect_anomaly: false
+use_adapter: false
+adapter: lora
+save_strategy: all
+adapter_conf: {}
+pretrain_path: null
+init_param: []
+ignore_init_mismatch: false
+freeze_param: []
+num_iters_per_epoch: 1000
+batch_size: 4
+valid_batch_size: null
+batch_bins: 1000000
+valid_batch_bins: null
+train_shape_file:
+- exp/enh_stats_16k/train/speech_mix_shape
+- exp/enh_stats_16k/train/speech_ref1_shape
+valid_shape_file:
+- exp/enh_stats_16k/valid/speech_mix_shape
+- exp/enh_stats_16k/valid/speech_ref1_shape
+batch_type: folded
+valid_batch_type: null
+fold_length:
+- 80000
+- 80000
+sort_in_batch: descending
+shuffle_within_batch: false
+sort_batch: descending
+multiple_iterator: false
+chunk_length: 64000
+chunk_shift_ratio: 0.5
+num_cache_chunks: 1024
+chunk_excluded_key_prefixes: []
+chunk_default_fs: null
+train_data_path_and_name_and_type:
+-   - dump/raw/tr_synthetic/wav.scp
+    - speech_mix
+    - sound
+-   - dump/raw/tr_synthetic/spk1.scp
+    - speech_ref1
+    - sound
+valid_data_path_and_name_and_type:
+-   - dump/raw/cv_synthetic_small/wav.scp
+    - speech_mix
+    - sound
+-   - dump/raw/cv_synthetic_small/spk1.scp
+    - speech_ref1
+    - sound
+allow_variable_data_keys: false
+max_cache_size: 0.0
+max_cache_fd: 32
+allow_multi_rates: false
+valid_max_cache_size: null
+exclude_weight_decay: false
+exclude_weight_decay_conf: {}
+optim: adamw
+optim_conf:
+    lr: 0.001
+    eps: 1.0e-08
+    weight_decay: 0.01
+scheduler: warmupreducelronplateau
+scheduler_conf:
+    warmup_steps: 4000
+    mode: min
+    factor: 0.5
+    patience: 3
+init: xavier_uniform
+model_conf:
+    normalize_variance: true
+criterions:
+-   name: mr_l1_tfd
+    conf:
+        window_sz:
+        - 256
+        - 512
+        - 768
+        - 1024
+        time_domain_weight: 0.5
+        reduction: sum
+        eps: 1.0e-08
+    wrapper: fixed_order
+    wrapper_conf:
+        weight: 1.0
+-   name: si_snr
+    conf:
+        eps: 1.0e-07
+    wrapper: fixed_order
+    wrapper_conf:
+        weight: 0.0
+speech_volume_normalize: null
+rir_scp: null
+rir_apply_prob: 1.0
+noise_scp: null
+noise_apply_prob: 1.0
+noise_db_range: '13_15'
+short_noise_thres: 0.5
+use_reverberant_ref: false
+num_spk: 1
+num_noise_type: 1
+sample_rate: 16000
+force_single_channel: true
+channel_reordering: false
+categories: []
+speech_segment: null
+avoid_allzero_segment: true
+flexible_numspk: false
+dynamic_mixing: false
+utt2spk: null
+dynamic_mixing_gain_db: 0.0
+encoder: stft
+encoder_conf:
+    n_fft: 256
+    hop_length: 128
+separator: tflocoformer
+separator_conf:
+    num_spk: 1
+    n_layers: 6
+    emb_dim: 128
+    norm_type: rmsgroupnorm
+    num_groups: 4
+    tf_order: ft
+    n_heads: 4
+    flash_attention: false
+    ffn_type:
+    - swiglu_conv1d
+    - swiglu_conv1d
+    ffn_hidden_dim:
+    - 384
+    - 384
+    conv1d_kernel: 4
+    conv1d_shift: 1
+    dropout: 0.0
+    eps: 1.0e-05
+decoder: stft
+decoder_conf:
+    n_fft: 256
+    hop_length: 128
+mask_module: multi_mask
+mask_module_conf: {}
+preprocessor: enh
+preprocessor_conf: {}
+diffusion_model: null
+diffusion_model_conf: {}
+required:
+- output_dir
+version: '202402'
+distributed: true

@@ -1,0 +1,6 @@
+# Copyright (C) 2024 Mitsubishi Electric Research Laboratories (MERL)
+#
+# SPDX-License-Identifier: Apache-2.0
+
+espnet
+rotary-embedding-torch==0.6.1

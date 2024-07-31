@@ -1,0 +1,54 @@
+# Copyright (C) 2024 Mitsubishi Electric Research Laboratories (MERL)
+# Copyright (C) 2017 ESPnet Developers
+#
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
+
+--- whamr_data_prep.sh.orig	2024-06-25 16:06:05.031799614 -0400
++++ whamr_data_prep.sh	2024-06-25 17:05:10.303535373 -0400
+@@ -72,13 +72,38 @@ for x in tr cv tt; do
+           > ${data}/${ddir}/noise1.scp
+       fi
+
+-      spk1_wav_dir=${rootdir}/s1_${cond}
+-      sed -e "s#${mixwav_dir}#${spk1_wav_dir}#g" ${data}/${ddir}/wav.scp \
+-        > ${data}/${ddir}/spk1.scp
+-      if [[ "$mixtype" != "single" ]]; then
+-        spk2_wav_dir=${rootdir}/s2_${cond}
+-        sed -e "s#${mixwav_dir}#${spk2_wav_dir}#g" ${data}/${ddir}/wav.scp \
+-          > ${data}/${ddir}/spk2.scp
++
++      # NOTE: modified to do dereverberation and separation
++      if [[ "$cond" = "reverb" ]]; then
++        # make anechoic spk scp files
++        spk1_wav_dir=${rootdir}/s1_anechoic
++        sed -e "s#${mixwav_dir}#${spk1_wav_dir}#g" ${data}/${ddir}/wav.scp \
++          > ${data}/${ddir}/spk1.scp
++        if [[ "$mixtype" != "single" ]]; then
++          spk2_wav_dir=${rootdir}/s2_anechoic
++          sed -e "s#${mixwav_dir}#${spk2_wav_dir}#g" ${data}/${ddir}/wav.scp \
++            > ${data}/${ddir}/spk2.scp
++        fi
++
++        # reverb scps
++        spk1_wav_dir=${rootdir}/s1_${cond}
++        sed -e "s#${mixwav_dir}#${spk1_wav_dir}#g" ${data}/${ddir}/wav.scp \
++          > ${data}/${ddir}/spk1_reverb.scp
++        if [[ "$mixtype" != "single" ]]; then
++          spk2_wav_dir=${rootdir}/s2_${cond}
++          sed -e "s#${mixwav_dir}#${spk2_wav_dir}#g" ${data}/${ddir}/wav.scp \
++            > ${data}/${ddir}/spk2_reverb.scp
++        fi
++      else
++        # original code
++        spk1_wav_dir=${rootdir}/s1_${cond}
++        sed -e "s#${mixwav_dir}#${spk1_wav_dir}#g" ${data}/${ddir}/wav.scp \
++          > ${data}/${ddir}/spk1.scp
++        if [[ "$mixtype" != "single" ]]; then
++          spk2_wav_dir=${rootdir}/s2_${cond}
++          sed -e "s#${mixwav_dir}#${spk2_wav_dir}#g" ${data}/${ddir}/wav.scp \
++            > ${data}/${ddir}/spk2.scp
++        fi
+       fi
+
+       if [[ "$cond" = "reverb" ]]; then

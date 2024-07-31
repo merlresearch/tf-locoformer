@@ -1,0 +1,75 @@
+# Copyright (C) 2024 Mitsubishi Electric Research Laboratories (MERL)
+# Copyright (C) 2017 ESPnet Developers
+#
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
+
+
+--- local/data.sh	2024-06-26 11:15:24.682654080 -0400
++++ local/data.sh.new	2024-06-26 11:15:31.698605036 -0400
+@@ -30,6 +30,8 @@ min_or_max=max
+ sample_rate=16k
+ num_spk=2
+
++cond=noisy  # noisy or clean
++
+ stage=0
+ stop_stage=100
+
+@@ -70,7 +72,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage}
+     if [ -z "${wham_noise}" ]; then
+         # 17.65 GB unzipping to 35 GB
+         mkdir -p ${cdir}/data/wham_noise
+-        wham_noise_url=https://storage.googleapis.com/whisper-public/wham_noise.zip
++        wham_noise_url=https://my-bucket-a8b4b49c25c811ee9a7e8bba05fa24c7.s3.amazonaws.com/wham_noise.zip
+         wget --continue -O "${cdir}/data/wham_noise.zip" ${wham_noise_url}
+         num_wavs=$(find "${cdir}/data/wham_noise" -iname "*.wav" | wc -l)
+         if [ "${num_wavs}" = "4" ]; then
+@@ -116,21 +118,35 @@ if [ ${stage} -le 2 ] && [ ${stop_stage}
+     librimix="data/LibriMix/libri_mix/Libri2Mix"
+     for dset in dev test train; do
+         mkdir -p "data/${dset}"
+-        if [ "$dset" = "train" ]; then
+-            cat ${librimix}/wav${sample_rate}/${min_or_max}/metadata/mixture_train-*_mix_both.csv | grep -v mixture_ID | sort -u > "data/${dset}/tmp"
++
++        if [ "$cond" = "noisy" ]; then
++            if [ "$dset" = "train" ]; then
++                cat ${librimix}/wav${sample_rate}/${min_or_max}/metadata/mixture_train-*_mix_both.csv | grep -v mixture_ID | sort -u > "data/${dset}/tmp"
++            else
++                grep -v mixture_ID ${librimix}/wav${sample_rate}/${min_or_max}/metadata/mixture_${dset}_mix_both.csv | sort -u > "data/${dset}/tmp"
++            fi
+         else
+-            grep -v mixture_ID ${librimix}/wav${sample_rate}/${min_or_max}/metadata/mixture_${dset}_mix_both.csv | sort -u > "data/${dset}/tmp"
++            if [ "$dset" = "train" ]; then
++                cat ${librimix}/wav${sample_rate}/${min_or_max}/metadata/mixture_train-*_mix_clean.csv | grep -v mixture_ID | sort -u > "data/${dset}/tmp"
++            else
++                grep -v mixture_ID ${librimix}/wav${sample_rate}/${min_or_max}/metadata/mixture_${dset}_mix_clean.csv | sort -u > "data/${dset}/tmp"
++            fi
+         fi
++
+         awk -F ',' '{print $1, $1}' "data/${dset}/tmp" > "data/${dset}/utt2spk"
+         awk -F ',' '{print $1, $1}' "data/${dset}/tmp" > "data/${dset}/spk2utt"
+         awk -F ',' '{print $1, $2}' "data/${dset}/tmp" > "data/${dset}/wav.scp"
+         awk -F ',' '{print $1, $3}' "data/${dset}/tmp" > "data/${dset}/spk1.scp"
+         awk -F ',' '{print $1, $4}' "data/${dset}/tmp" > "data/${dset}/spk2.scp"
+         if [ $num_spk -eq 2 ]; then
+-            awk -F ',' '{print $1, $5}' "data/${dset}/tmp" > "data/${dset}/noise1.scp"
++            if [ "$cond" = "noisy" ]; then
++                awk -F ',' '{print $1, $5}' "data/${dset}/tmp" > "data/${dset}/noise1.scp"
++            fi
+         else
+             awk -F ',' '{print $1, $5}' "data/${dset}/tmp" > "data/${dset}/spk3.scp"
+-            awk -F ',' '{print $1, $6}' "data/${dset}/tmp" > "data/${dset}/noise1.scp"
++            if [ "$cond" = "noisy" ]; then
++                awk -F ',' '{print $1, $6}' "data/${dset}/tmp" > "data/${dset}/noise1.scp"
++            fi
+         fi
+         rm "data/${dset}/tmp"
+     done
+@@ -147,6 +163,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage}
+             [ "$f" = "data/train/wav.scp" ] || utils/filter_scp.pl "data/${subset}/wav.scp" "$f" > "data/${subset}/$(basename $f)"
+         done
+         utils/filter_scp.pl "data/${subset}/wav.scp" data/train/utt2spk > data/${subset}/utt2spk
++        utils/utt2spk_to_spk2utt.pl data/${subset}/utt2spk > data/${subset}/spk2utt
+     done
+ fi

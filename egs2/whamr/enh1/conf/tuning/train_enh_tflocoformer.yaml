@@ -1,0 +1,92 @@
+# Copyright (C) 2024 Mitsubishi Electric Research Laboratories (MERL)
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+init: xavier_uniform
+max_epoch: 150
+use_amp: false
+batch_type: folded
+batch_size: 4  # batch size 4 on 4 Quadro RTX 6000 (24GiB)
+num_workers: 4
+
+# preprocessor
+preprocessor: enh
+num_spk: &num_spk 2
+iterator_type: sequence # not to discard short samples
+speech_segment: 32000
+shuffle_within_batch: true
+force_single_channel: true
+
+# espnet model configuration
+model_conf:
+    normalize_variance: true
+
+# optimizer and scheduler
+optim: adamw
+optim_conf:
+    lr: 1.0e-03
+    eps: 1.0e-08
+    weight_decay: 1.0e-02
+patience: 10
+val_scheduler_criterion:
+- valid
+- loss
+best_model_criterion:
+-   - valid
+    - si_snr
+    - max
+-   - valid
+    - loss
+    - min
+keep_nbest_models: 5
+scheduler: warmupreducelronplateau
+scheduler_conf:
+    warmup_steps: 4000
+    mode: min
+    factor: 0.5
+    patience: 3
+
+# model configuration
+encoder: &encoder stft
+encoder_conf:
+    n_fft: &n_fft 256
+    hop_length: &hop_length 64
+decoder: *encoder
+decoder_conf:
+    n_fft: *n_fft
+    hop_length: *hop_length
+separator: tflocoformer
+separator_conf:
+    num_spk: *num_spk
+    n_layers: 6
+    # general setup
+    emb_dim: 128
+    norm_type: rmsgroupnorm
+    num_groups: 4
+    tf_order: ft
+    # self-attention
+    n_heads: 4
+    flash_attention: false
+    # ffn
+    ffn_type:
+        - swiglu_conv1d
+        - swiglu_conv1d
+    ffn_hidden_dim:
+        - 192
+        - 192 # list order must be the same as ffn_type
+    conv1d_kernel: 8
+    conv1d_shift: 1
+    dropout: 0.0
+    # others
+    eps: 1.0e-5
+
+criterions:
+    # The first criterion
+  - name: si_snr
+    conf:
+        eps: 1.0e-7
+    wrapper: pit
+    wrapper_conf:
+        weight: 1.0
+        independent_perm: true

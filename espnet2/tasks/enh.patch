@@ -1,0 +1,25 @@
+# Copyright (C) 2024 Mitsubishi Electric Research Laboratories (MERL)
+# Copyright (C) 2017 ESPnet Developers
+#
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
+
+
+--- ./espnet/espnet2/tasks/enh_org.py	2024-05-30 13:30:00.865662269 -0400
++++ ./espnet/espnet2/tasks/enh.py	2024-05-30 13:30:56.161269346 -0400
+@@ -63,6 +63,7 @@ from espnet2.enh.separator.svoice_separa
+ from espnet2.enh.separator.tcn_separator import TCNSeparator
+ from espnet2.enh.separator.tfgridnet_separator import TFGridNet
+ from espnet2.enh.separator.tfgridnetv2_separator import TFGridNetV2
++from espnet2.enh.separator.tflocoformer_separator import TFLocoformerSeparator
+ from espnet2.enh.separator.transformer_separator import TransformerSeparator
+ from espnet2.enh.separator.uses_separator import USESSeparator
+ from espnet2.iterators.abs_iter_factory import AbsIterFactory
+@@ -112,6 +113,7 @@ separator_choices = ClassChoices(
+         tfgridnet=TFGridNet,
+         tfgridnetv2=TFGridNetV2,
+         uses=USESSeparator,
++        tflocoformer=TFLocoformerSeparator,
+     ),
+     type_check=AbsSeparator,
+     default="rnn",

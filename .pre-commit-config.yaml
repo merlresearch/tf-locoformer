@@ -1,0 +1,64 @@
+# Copyright (C) 2024 Mitsubishi Electric Research Laboratories (MERL)
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Pre-commit configuration. See https://pre-commit.com
+
+default_language_version:
+  python: python3
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+
+  - repo: https://gitlab.com/bmares/check-json5
+    rev: v1.0.0
+    hooks:
+      - id: check-json5
+
+  - repo: https://github.com/homebysix/pre-commit-macadmin
+    rev: v1.12.3
+    hooks:
+      - id: check-git-config-email
+        args: ['--domains', 'merl.com']
+
+  - repo: https://github.com/psf/black
+    rev: 22.12.0
+    hooks:
+      - id: black
+        args:
+          - --line-length=120
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--filter-files", "--line-length", "120", "--skip-gitignore"]
+
+  # Uncomment to use pyupgrade (https://github.com/asottile/pyupgrade) to automatically upgrade syntax for newer python
+  # - repo: https://github.com/asottile/pyupgrade
+  #   rev: v3.3.1
+  #   hooks:
+  #     - id: pyupgrade
+
+  # To stop flake8 error from causing a failure, use --exit-zero. By default, pre-commit will not show the warnings,
+  # so use verbose: true to see them.
+  - repo: https://github.com/pycqa/flake8
+    rev: 5.0.4
+    hooks:
+      - id: flake8
+        # Black compatibility, Eradicate options
+        args: ["--max-line-length=120", "--extend-ignore=E203",
+               "--eradicate-whitelist-extend", "eradicate:\\s*no",
+               "--exit-zero"]
+        verbose: true
+        additional_dependencies: [
+          # https://github.com/myint/eradicate, https://github.com/wemake-services/flake8-eradicate
+          "flake8-eradicate"
+        ]

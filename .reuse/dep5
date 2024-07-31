@@ -1,0 +1,9 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+
+Files: *.png
+Copyright: 2024 Mitsubishi Electric Research Laboratories (MERL)
+License: Apache-2.0
+
+Files: *.pth
+Copyright: 2024 Mitsubishi Electric Research Laboratories (MERL)
+License: Apache-2.0
