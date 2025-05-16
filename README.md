@@ -54,7 +54,7 @@ conda activate tflocoformer && pip install rotary-embedding-torch==0.6.1
 
 # Copy the TF-Locoformer code to ESPnet.
 # NOTE: ./copy_files_to_espnet.sh changes `espnet2/tasks/enh.py`. Please be careful when using your existing ESPnet environment.
-cd ../../ && git clone https://github.com/merl-oss-private/tf-locoformer.git && cd tf_locoformer
+cd ../../ && git clone https://github.com/merlresearch/tf-locoformer.git && cd tf_locoformer
 ./copy_files_to_espnet.sh /path/to/espnet-root
 ```
 

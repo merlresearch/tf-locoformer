@@ -364,6 +364,11 @@ class LocoformerBlock(nn.Module):
 
         if self.macaron_style:
             # FFN before self-attention
+            # Note that this implementation does not include the 1/2 factor described in the paper.
+            # Experiments in the paper did use the 1/2 factor, but we removed it by mistake in this
+            # implementation. We found that the 1/2 factor does not impact final performance, and
+            # thus decided to keep the current implementation for consistency with the pre-trained
+            # models that we provide.
             input_ = x
             output = self.ffn_norm[-1](x)  # [B, T, F, C]
             output = self.ffn[-1](output)  # [B, T, F, C]
