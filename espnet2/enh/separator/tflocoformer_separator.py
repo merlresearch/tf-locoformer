@@ -70,7 +70,7 @@ class TFLocoformerSeparator(AbsSeparator):
         n_layers: int = 6,
         # general setup
         emb_dim: int = 128,
-        norm_type: str = "rmsgrouporm",
+        norm_type: str = "rmsgroupnorm",
         num_groups: int = 4,  # used only in RMSGroupNorm
         tf_order: str = "ft",
         # self-attention related
@@ -324,6 +324,9 @@ class LocoformerBlock(nn.Module):
             assert (
                 isinstance(ffn_hidden_dim, list) and len(ffn_hidden_dim) == 2
             ), "Two FFNs required when using Macaron-style model"
+        else:
+            ffn_type = [ffn_type]
+            ffn_hidden_dim = [ffn_hidden_dim]
 
         # initialize FFN
         self.ffn_norm = nn.ModuleList([])
