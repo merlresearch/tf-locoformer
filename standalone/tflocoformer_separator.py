@@ -62,7 +62,7 @@ class TFLocoformerSeparator(nn.Module):
         n_layers: int = 6,
         # general setup
         emb_dim: int = 128,
-        norm_type: str = "rmsgrouporm",
+        norm_type: str = "rmsgroupnorm",
         num_groups: int = 4,  # used only in RMSGroupNorm
         tf_order: str = "ft",
         # self-attention related
@@ -178,7 +178,7 @@ class TFLocoformerBlock(nn.Module):
         pe_time,
         # general setup
         emb_dim=128,
-        norm_type="rmsgrouporm",
+        norm_type="rmsgroupnorm",
         num_groups=4,
         tf_order="ft",
         # self-attention related
@@ -275,7 +275,7 @@ class LocoformerBlock(nn.Module):
         pe,
         # general setup
         emb_dim=128,
-        norm_type="rmsgrouporm",
+        norm_type="rmsgroupnorm",
         num_groups=4,
         # self-attention related
         n_heads=4,
@@ -292,6 +292,8 @@ class LocoformerBlock(nn.Module):
         super().__init__()
 
         FFN = {"swiglu_conv1d": SwiGLUConvDeconv1d}
+        if norm_type == "rmsgrouporm":
+            norm_type = "rmsgroupnorm"
         Norm = {"layernorm": nn.LayerNorm, "rmsgroupnorm": RMSGroupNorm}
         assert norm_type in Norm, norm_type
 

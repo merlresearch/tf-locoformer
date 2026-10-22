@@ -72,7 +72,7 @@ class BSLocoformerSeparator(nn.Module):
         n_layers: int = 6,
         # general setup
         emb_dim: int = 128,
-        norm_type: str = "rmsgrouporm",
+        norm_type: str = "rmsgroupnorm",
         num_groups: int = 4,  # used only in RMSGroupNorm
         tf_order: str = "ft",
         # self-attention related

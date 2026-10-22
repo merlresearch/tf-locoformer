@@ -70,7 +70,7 @@ class TFLocoformerSeparator(AbsSeparator):
         n_layers: int = 6,
         # general setup
         emb_dim: int = 128,
-        norm_type: str = "rmsgrouporm",
+        norm_type: str = "rmsgroupnorm",
         num_groups: int = 4,  # used only in RMSGroupNorm
         tf_order: str = "ft",
         # self-attention related
@@ -196,7 +196,7 @@ class TFLocoformerBlock(nn.Module):
         rope_time,
         # general setup
         emb_dim=128,
-        norm_type="rmsgrouporm",
+        norm_type="rmsgroupnorm",
         num_groups=4,
         tf_order="ft",
         # self-attention related
@@ -293,7 +293,7 @@ class LocoformerBlock(nn.Module):
         rope,
         # general setup
         emb_dim=128,
-        norm_type="rmsgrouporm",
+        norm_type="rmsgroupnorm",
         num_groups=4,
         # self-attention related
         n_heads=4,
@@ -313,6 +313,8 @@ class LocoformerBlock(nn.Module):
             "conv1d": ConvDeconv1d,
             "swiglu_conv1d": SwiGLUConvDeconv1d,
         }
+        if norm_type == "rmsgrouporm":
+            norm_type = "rmsgroupnorm"
         Norm = {
             "layernorm": nn.LayerNorm,
             "rmsgroupnorm": RMSGroupNorm,
@@ -324,6 +326,11 @@ class LocoformerBlock(nn.Module):
             assert (
                 isinstance(ffn_hidden_dim, list) and len(ffn_hidden_dim) == 2
             ), "Two FFNs required when using Macaron-style model"
+        else:
+            if not isinstance(ffn_type, list):
+                ffn_type = [ffn_type]
+            if not isinstance(ffn_hidden_dim, list):
+                ffn_hidden_dim = [ffn_hidden_dim]
 
         # initialize FFN
         self.ffn_norm = nn.ModuleList([])
